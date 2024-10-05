@@ -1,10 +1,12 @@
 ﻿#include "threads.h"
 
 
-KeyPressThread::KeyPressThread(bool* keyPressed) : keyPressed(keyPressed) { 
+KeyPressThread::KeyPressThread(bool* keyPressed, std::vector<int>* keysPressedStack) :
+    keyPressed(keyPressed), keysPressedStack(keysPressedStack) {
     currentSound = SoundEffects::soundB4;
     audioStream = new AudioStream();
     displayAudio = false;
+    keyPressTimer = new QElapsedTimer();
 
 }
 
@@ -52,13 +54,13 @@ void KeyPressThread::run()
 {
     while (true)
     {
-
-        if ((*keyPressed || displayAudio) and currentSound != nullptr)
+        if ((!(keysPressedStack->empty()) or displayAudio) and currentSound != nullptr)
         {
-            while ((*keyPressed || displayAudio))
+            while (!(keysPressedStack->empty()) or displayAudio)
+            {
                 audioStream->playAudio(currentSound);
+            }
         }
-
         QThread::sleep(0.02);
     }
 }

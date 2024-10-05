@@ -7,10 +7,10 @@
 #include <QThread>
 #include <vector>
 #include <queue>
-#include <data.h>
-#include <notewidget.h>
-#include <threads.h>
-
+#include "data.h"
+#include "notewidget.h"
+#include "threads.h"
+#include "staveviewmodel.h"
 
 
 /// <summary>
@@ -31,35 +31,15 @@ public:
 	/// </summary>
 	~StaveWidget();
 
-	/// <summary>
-	/// Metoda dodająca nutkę.
-	/// </summary>
-	/// <param name=audioSource> Wskaźnik na źródło dźwięku.</param>
-	/// <param name=beat> Ilość beatów w odebranym dźwięku.</param>
-	void addNote(AudioSource* audioSource, int beat);
-
-	/// <summary>
-	/// Metoda tworząca nową nutkę.
-	/// </summary>
-	/// <param name=audioSource> Wskaźnik na źródło dźwięku.</param>
-	/// <param name=beats> Ilość beatów w odebranym dźwięku.</param>
-	void newNote(AudioSource* audioSource, int beats);
-
-	/// <summary>
-	/// Metoda czyszcząca pięciolinię.
-	/// </summary>
-	void clearStave();
-
-	/// <summary>
-	/// Metoda zwracająca kolejkę wskaźników do obiektów nutek.
-	/// </summary>
-	std::queue<NoteWidget*> getNotes() { return *notes; };
 
 private:
-	/// <summary>
-	/// Wskaźnik do kolejki wskaźników nutek
-	/// </summary>
-	std::queue<NoteWidget*>* notes;
+
+	StaveViewModel* viewModel;
+
+	TrebleClefWidget* trebleClef;
+
+	BassClefWidget* bassClef;
+
 
 	/// <summary>
 	/// Metoda umożliwiająca zmianę wyglądu obiektu.
@@ -77,12 +57,17 @@ private:
 	void drawLowPitchLines(QPainter* painter);
 
 	/// <summary>
-	/// Metoda przemieszczająca nutki w stronę klucza.
-	/// </summary>
-	void pushNotes(std::queue<NoteWidget*>* notesQueue);
-
-	/// <summary>
 	/// Metoda rysująca pięciolinie.
 	/// </summary>
 	void buildStaveLines(QPainter* painter);
+
+
+signals:
+	void createNewNoteSignal(AudioSource* audioSource, int beats);
+	void pushNewNoteSignal(NoteWidget* note);
+	void clearStaveSignal();
+
+
+private slots:
+	void addNewNote(int notePosY, int beat);
 };

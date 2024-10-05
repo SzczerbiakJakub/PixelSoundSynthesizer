@@ -3,9 +3,11 @@
 #include <QTransform>
 #include <QImage>
 #include <QPixmap>
+#include <QObject>
 #include <QPen>
 #include <QPainter>
 #include <data.h>
+#include "noteviewmodel.h"
 
 
 #define WHOLE_NOTE_IMG_PATH "assets/whole_note.png"
@@ -21,6 +23,8 @@
 /// </summary>
 class NoteWidget : public QLabel
 {
+	Q_OBJECT
+
 public:
 	/// <summary>
 	/// Konstruktor klasy.
@@ -53,6 +57,9 @@ public:
 
 
 private:
+
+	NoteViewModel* viewModel;
+
 	/// <summary>
 	/// Koordynat X obiektu.
 	/// </summary>
@@ -63,40 +70,13 @@ private:
 	/// </summary>
 	int y;
 
-	/// <summary>
-	/// Ilość beatów w przynależnym do obiektu dźwięku.
-	/// </summary>
-	int beat;
 
-	/// <summary>
-	/// Metoda zmieniająca kolor obrazu przedstawiającego obiekt.
-	/// </summary>
-	void setImageColor(QImage* image);
+signals:
+	void getCustomNotePixmap(int y, int beat);
 
-	/// <summary>
-	/// Metoda zwracająca składową R koloru RGB zależnie od położenia obiektu na pięciolinii.
-	/// </summary>
-	int getValueR();
+private slots:
+	void setCustomNotePixmap(QPixmap* pixmap, bool noteInverted);
 
-	/// <summary>
-	/// Metoda zwracająca składową G koloru RGB zależnie od położenia obiektu na pięciolinii.
-	/// </summary>
-	int getValueG();
-
-	/// <summary>
-	/// Metoda zwracająca składową B koloru RGB zależnie od położenia obiektu na pięciolinii.
-	/// </summary>
-	int getValueB();
-
-	/// <summary>
-	/// Metoda zwracająca obraz nutki przekształcony na kolorowy na podstawie zaimplementowanego w funkcji algorytmu.
-	/// </summary>
-	QImage* getRgbaNoteImage();
-
-	/// <summary>
-	/// Metoda przekształcająca pixmapę obiektu na odwróconą do góry nogami.
-	/// </summary>
-	QPixmap* invertPixmap(QPixmap* pixmap);
 };
 
 

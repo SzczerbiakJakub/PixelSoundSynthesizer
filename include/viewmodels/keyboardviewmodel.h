@@ -1,24 +1,12 @@
 ﻿#pragma once
 #include "data.h"
 #include <QObject>
-#include <QTimer>
 #include <vector>
 #include "keywidget.h"
 
 
+#define KEYBOARD_IMAGE_PATH "assets/keyboard.png"
 
-
-class KeyViewModel
-{
-public:
-
-private:
-
-
-};
-
-
-class KeyboardWidget;
 
 
 class KeyboardViewModel : public QObject
@@ -26,26 +14,47 @@ class KeyboardViewModel : public QObject
 	Q_OBJECT
 
 public:
-	KeyboardViewModel(QObject* parent, KeyboardWidget* keyboardWidgetPtr);
+	KeyboardViewModel(QObject* parent=nullptr);
 	~KeyboardViewModel() {};
-	//void appendNewKeyWidget(KeyWidget* keyWidgetPtr);
+
+	/// <summary>
+	/// Metoda zwracająca wskaźnik na obiekt KeyWidget zależnie do określonego symbolu słownego.
+	/// </summary>
+	KeyWidget* getKeyWidget(std::string keySymbol);
+
+	/// <summary>
+	/// Metoda zwracająca wskaźnik na obiekt KeyWidget zależnie do określonego ID klawisza.
+	/// </summary>
+	KeyWidget* getKeyWidget(int keyID);
+
+
+	/// <summary>
+	/// Metoda zwracająca wektor przechowujący wskaźniki do obiektów KeyWidget przynależnych do klawiatury.
+	/// </summary>
+	std::vector<KeyWidget*> getKeyWidgetsVector() { return *keyWidgetsVector; };
+
 
 private:
-	QTimer* updateTimer;
-	KeyboardWidget* view;
-	void buildKeyboard();
+	/// <summary>
+	/// Wskaźnik na pixmapę obiektu.
+	/// </summary>
+	QPixmap* keyboardPixmap;
+
 
 	std::vector<KeyWidget*>* keyWidgetsVector;
 
+
 signals:
-	void updateTimeout();
+	void pressKeySignal(int qKey);
+	void releaseKeySignal(int qKey);
+
+
+public slots:
+	void addNewKeyToVector(KeyWidget* keyWidgetPtr);
+
 
 private slots:
-
-	/// <summary>
-	/// Metoda wywoływana gdy upłynie czas timera klawiatury. Odpowiada za przywrócenie domyślnego wyglądu 
-	/// klawiszom.
-	/// </summary>
-	void updateKeysPixmaps();
+	void pressKey(int qKey) { emit pressKeySignal(qKey); }
+	void releaseKey(int qKey) { emit releaseKeySignal(qKey); }
 };
 

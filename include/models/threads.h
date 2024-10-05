@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <QThread>
 #include <QElapsedTimer>
+#include <stack>
 #include <soundeffect.h>
 #include <data.h>
 
@@ -19,7 +20,7 @@ public:
     /// Konstruktor klasy.
     /// </summary>
     /// <param name=keyPressed> Wskaźnik na wartość logiczną dotyczącą wciśnięcia klawisza.</param>
-    KeyPressThread(bool* keyPressed);
+    KeyPressThread(bool* keyPressed, std::vector<int>* keysPressedStack);
 
     /// <summary>
     /// Destruktor klasy.
@@ -53,6 +54,8 @@ public:
 
 private:
 
+    QElapsedTimer* keyPressTimer;
+
     /// <summary>
     /// Włącza wątek.
     /// </summary>
@@ -73,6 +76,8 @@ private:
     /// Wskaźnik na zmienną przechowującą informację o wciśnieciu klawisza.
     /// </summary>
     bool* keyPressed;
+    
+    std::vector<int>* keysPressedStack;
 
     /// <summary>
     /// Wskaźnik na klawisz.
@@ -88,5 +93,9 @@ private:
     /// Wskaźnik na obecny stream dźwięku.
     /// </summary>
     AudioStream* audioStream;
+
+
+signals:
+    void emitCreateNewNoteSignal(int keyPressed, int beats);
 
 };

@@ -3,6 +3,7 @@
 #include <QLabel>
 #include <QWidget>
 #include <QObject>
+#include "keyviewmodel.h"
 
 
 
@@ -39,72 +40,17 @@ public:
 	/// </summary>
 	~KeyWidget();
 
-	/// <summary>
-	/// Metoda ustawiająca wartość zmiennej pressed na true.
-	/// </summary>
-	void highlightPressedKey() { pressed = true; };
 
-	/// <summary>
-	/// Metoda ustawiająca wartość parametru pressed na false.
-	/// </summary>
-	void unhighlightPressedKey() { pressed = false; };
+	KeyViewModel* getViewModel() { return viewModel; }
 
+private:
+	KeyViewModel* viewModel;
+
+private slots:
 	/// <summary>
 	/// Metoda aktualizująca wygląd klawisza zależnie do wartości parametru pressed.
 	/// </summary>
-	void updatePixmap();
-
-	/// <summary>
-	/// Metoda zwracająca symbol klawisza.
-	/// </summary>
-	std::string getKeySymbol() { return keySymbol; };
-
-	/// <summary>
-	/// Metoda zwracająca ID klawisza.
-	/// </summary>
-	int getKeyID() { return keyID; };
-
-	/// <summary>
-	/// Metoda zwracająca wartość parametru pressed.
-	/// </summary>
-	bool isPressed() { return pressed; };
+	void updatePixmap(QPixmap* pixmap);
 
 
-private:
-	/// <summary>
-	/// Parametr logiczny przechowujący wartość o wciśnięciu klawisza.
-	/// </summary>
-	bool pressed;
-
-	/// <summary>
-	/// Parametr przechowujący ID klawisza przypisanego do obiektu.
-	/// </summary>
-	int keyID;
-
-	/// <summary>
-	/// PArametr przechowujący symbol słowny klawisza.
-	/// </summary>
-	std::string keySymbol;
-
-	/// <summary>
-	/// Wskaźnik na pixmapę zawierający wygląd klawisza niewciśniętego.
-	/// </summary>
-	QPixmap* keyPixmap;
-
-	/// <summary>
-	/// Wskaźnik na pixmapę zawierający wygląd klawisza wciśniętego.
-	/// </summary>
-	QPixmap* pressedKeyPixmap;
-
-	/// <summary>
-	/// Metoda inline zwracająca ścieżkę względną do pliku zawierającego pixmapę klawisza niewciśniętego.
-	/// </summary>
-	inline std::string getPixmapPath() { return KEY_PIXMAP_DIR_PATH + keySymbol + KEY_PIXMAP_EXTENSION; };
-
-	/// <summary>
-	/// Metoda inline zwracająca ścieżkę względną do pliku zawierającego pixmapę klawisza wciśniętego.
-	/// </summary>
-	inline std::string getHighlightedPixmapPath() {
-		return KEY_PIXMAP_DIR_PATH + keySymbol + HIGHLIGHTED_POSTFIX + KEY_PIXMAP_EXTENSION;
-	};
 };

@@ -10,11 +10,11 @@
 #include <QThread>
 #include <stack>
 #include <data.h>
-#include <soundeffect.h>
 #include <threads.h>
-#include <optionswidget.h>
+#include <menuwidget.h>
 #include <stavewidget.h>
 #include <keyboardwidget.h>
+#include <mainwindowviewmodel.h>
 
 
 /// <summary>
@@ -36,26 +36,15 @@ public:
     /// </summary>
     ~MainWindow();
 
-    /// <summary>
-    /// Metoda zwracająca wskaźnik na wątek klasy KeyPressThread.
-    /// </summary>
-    KeyPressThread* getKeyPressThread() { return keyPressThread; };
-
-    /// <summary>
-    /// Parametr HRESULT.
-    /// </summary>
-    HRESULT hr;
 
 private:
+
+    MainWindowViewModel* viewModel;
+
     /// <summary>
     /// Metoda tworząca GUI obiektu.
     /// </summary>
     void buildUi();
-
-    /// <summary>
-    /// Wskaźnik na obiekt AudioStream odpowiedzialny za streaming dźwięku w programie.
-    /// </summary>
-    AudioStream* audioStream;
 
     /// <summary>
     /// Wskaźnik na centralny widget okna.
@@ -78,31 +67,6 @@ private:
     MenuWidget* menuWidget;
 
     /// <summary>
-    /// Wskaźnik na timer mierzący czas wciśnięcia przycisku.
-    /// </summary>
-    QElapsedTimer* keyPressTimer = new QElapsedTimer;
-
-    /// <summary>
-    /// Wskaźnik na timer mierzący czas braku dźwięku.
-    /// </summary>
-    QElapsedTimer* noSoundTimer = new QElapsedTimer;
-
-    /// <summary>
-    /// Zmienna logiczna przechowująca wartość o wciśnięciu dowolnego przycisku.
-    /// </summary>
-    bool keyPressed;
-
-    /// <summary>
-    /// Wskaźnik na stos zawierający ID wciśniętych przycisków.
-    /// </summary>
-    std::stack<int>* keysPressed = new std::stack<int>;
-
-    /// <summary>
-    /// Wskaźnik na wątek odpowiedzialny za zmiane stanu programu zależnie od wciśnietego przycisku.
-    /// </summary>
-    KeyPressThread* keyPressThread = new KeyPressThread(&keyPressed);
-
-    /// <summary>
     /// Metoda wywoływana przy wciśnięciu dowolnego przycisku klawiatury.
     /// </summary>
     void keyPressEvent(QKeyEvent* event) override;
@@ -111,4 +75,26 @@ private:
     /// Metoda wywoływana przy odciśnięciu dowolnego przycisku klawiatury.
     /// </summary>
     void keyReleaseEvent(QKeyEvent* event) override;
+
+
+signals:
+    void keyPressSignal(int keyID);
+    void keyReleaseSignal(int keyID);
+
+
+private slots:
+
+    void visualiseKeyPress(int keyID);
+    void visualiseKeyRelease(int keyID);
+    void emitClearStave();
+
+    void emitChangeSoundKeyPair(int keyID);
+
+    void emitPrevOption();
+    void emitNextOption();
+    void emitLeftRelativeOption();
+    void emitRightRelativeOption();
+    void emitSelectOption();
+    void emitCreateNewNote(int keyPressed, int beats);
+
 };

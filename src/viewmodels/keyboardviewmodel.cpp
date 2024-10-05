@@ -1,27 +1,46 @@
 #include "keyboardviewmodel.h"
 
 
-KeyboardViewModel::KeyboardViewModel(QObject* parent, KeyboardWidget* keyboardWidgetPtr) :
-	QObject(parent), view(keyboardWidgetPtr) {
+KeyboardViewModel::KeyboardViewModel(QObject* parent) : QObject(parent) {
 
-	updateTimer = new QTimer(this);
-	connect(updateTimer, &QTimer::timeout, this, &KeyboardViewModel::updateKeysPixmaps);
-	updateTimer->start(30);
+	keyWidgetsVector = new std::vector<KeyWidget*>;
 }
 
 
-//void KeyboardViewModel::appendNewKeyWidget(KeyWidget* keyWidgetPtr) {
-//	KeyboardData::keyWidgetsVector->push_back(keyWidgetPtr);
-//}
 
-void KeyboardViewModel::buildKeyboard() {
-
+void KeyboardViewModel::addNewKeyToVector(KeyWidget* keyWidgetPtr) {
+	QObject::connect(this, &KeyboardViewModel::pressKeySignal, keyWidgetPtr->getViewModel(), &KeyViewModel::pressKey);
+	QObject::connect(this, &KeyboardViewModel::releaseKeySignal, keyWidgetPtr->getViewModel(), &KeyViewModel::releaseKey);
+	keyWidgetsVector->push_back(keyWidgetPtr);
 }
 
 
-void KeyboardViewModel::updateKeysPixmaps() {
-	for (KeyWidget* keyWidget : *keyWidgetsVector) {
-		keyWidget->updatePixmap();
+KeyWidget* KeyboardViewModel::getKeyWidget(std::string keySymbol) {
+
+	int index = 0;
+	std::string keySymbolGot = getKeyWidgetsVector()[index]->getViewModel()->getKeySymbol();
+
+	while (keySymbolGot != keySymbol)
+	{
+		index++;
+		keySymbolGot = getKeyWidgetsVector()[index]->getViewModel()->getKeySymbol();
 	}
+
+	return getKeyWidgetsVector()[index];
+
 }
 
+KeyWidget* KeyboardViewModel::getKeyWidget(int keyID) {
+
+	int index = 0;
+	int idGot = getKeyWidgetsVector()[index]->getViewModel()->getKeyID();
+
+	while (idGot != keyID)
+	{
+		index++;
+		idGot = getKeyWidgetsVector()[index]->getViewModel()->getKeyID();
+	}
+
+	return getKeyWidgetsVector()[index];
+
+}

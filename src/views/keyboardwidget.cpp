@@ -6,73 +6,33 @@
 KeyboardWidget::KeyboardWidget(QWidget* parent) : QLabel(parent) {
 
 	setFixedSize(1078, 469);
-	keyWidgetsVector = new std::vector<KeyWidget*>;
-	updateTimer = new QTimer(this); 
-	connect(updateTimer, &QTimer::timeout, this, &KeyboardWidget::onTimeout);
 
 	keyboardPixmap = new QPixmap(QString::fromStdString(KEYBOARD_IMAGE_PATH));
 	*keyboardPixmap = keyboardPixmap->scaled(size());
 	setPixmap(*keyboardPixmap);
 
-	buildKeyboard();
-	updateTimer->start(30);
+	viewModel = new KeyboardViewModel();
+	QObject::connect(this, &KeyboardWidget::newKeyWidgetCreated, viewModel, &KeyboardViewModel::addNewKeyToVector);
+	QObject::connect(this, &KeyboardWidget::keyPressedSignal, viewModel, &KeyboardViewModel::pressKeySignal);
+	QObject::connect(this, &KeyboardWidget::keyReleasedSignal, viewModel, &KeyboardViewModel::releaseKeySignal);
 
+	buildKeyboard();
 
 }
+
 
 KeyboardWidget::~KeyboardWidget() {
 
 	delete keyboardPixmap;
-	for (KeyWidget* keyWidget : *keyWidgetsVector)
-	{
-		delete keyWidget;
-	}
-	delete keyWidgetsVector;
-	delete updateTimer;
+	delete viewModel;
 }
 
 
-void KeyboardWidget::onTimeout() {
-	for (KeyWidget* keyWidget : *keyWidgetsVector) {
-		keyWidget->updatePixmap();
-	}
-}
-
-
-KeyWidget* KeyboardWidget::getKeyWidget(std::string keySymbol) {
-
-	int index = 0;
-	std::string keySymbolGot = getKeyWidgetsVector()[index]->getKeySymbol();
-
-	while (keySymbolGot != keySymbol)
-	{
-		index++;
-		keySymbolGot = getKeyWidgetsVector()[index]->getKeySymbol();
-	}
-	
-	return getKeyWidgetsVector()[index];
-
-}
-
-KeyWidget* KeyboardWidget::getKeyWidget(int keyID) {
-
-	int index = 0;
-	int idGot = getKeyWidgetsVector()[index]->getKeyID();
-
-	while (idGot != keyID)
-	{
-		index++;
-		idGot = getKeyWidgetsVector()[index]->getKeyID();
-	}
-
-	return getKeyWidgetsVector()[index];
-
-}
 
 void KeyboardWidget::addNewKeyWidget(std::string keySymbol, int id, int x, int y ) {
 	KeyWidget* newKey = new KeyWidget(this, keySymbol, id);
 	newKey->move(x, y);
-	keyWidgetsVector->push_back(newKey);
+	emit newKeyWidgetCreated(newKey);
 }
 
 

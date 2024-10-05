@@ -1,27 +1,42 @@
 #include "mainwindow.h"
 
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), centralWidget(new QWidget(this)), keyboardWidget(nullptr)
 {
     buildUi();
     setFixedSize(1536, 800);
-    keyPressThread->start();
-    noSoundTimer->start();
+
+    viewModel = new MainWindowViewModel();
+
+    QObject::connect(this, &MainWindow::keyPressSignal, viewModel, &MainWindowViewModel::keyPress);
+    QObject::connect(this, &MainWindow::keyReleaseSignal, viewModel, &MainWindowViewModel::keyRelease);
+
+    
+    QObject::connect(menuWidget, &MenuWidget::displaySelectedAudioSignal, viewModel, &MainWindowViewModel::displayRecordedAudio);
+    
+    QObject::connect(viewModel, &MainWindowViewModel::visualiseKeyPressSignal , this, &MainWindow::visualiseKeyPress);
+    QObject::connect(viewModel, &MainWindowViewModel::visualiseKeyReleaseSignal, this, &MainWindow::visualiseKeyRelease);
+    QObject::connect(viewModel, &MainWindowViewModel::emitClearStaveSignal, this, &MainWindow::emitClearStave);
+    QObject::connect(viewModel, &MainWindowViewModel::emitChangeSoundKeyPairSignal, this, &MainWindow::emitChangeSoundKeyPair);
+    QObject::connect(viewModel, &MainWindowViewModel::emitPrevOptionSignal, this, &MainWindow::emitPrevOption);
+    QObject::connect(viewModel, &MainWindowViewModel::emitNextOptionSignal, this, &MainWindow::emitNextOption);
+    QObject::connect(viewModel, &MainWindowViewModel::emitLeftRelativeOptionSignal, this, &MainWindow::emitLeftRelativeOption);
+    QObject::connect(viewModel, &MainWindowViewModel::emitRightRelativeOptionSignal, this, &MainWindow::emitRightRelativeOption);
+    QObject::connect(viewModel, &MainWindowViewModel::emitSelectOptionSignal, this, &MainWindow::emitSelectOption);
+    QObject::connect(viewModel, &MainWindowViewModel::emitCreateNewNoteSignal, this, &MainWindow::emitCreateNewNote);
 
 }
 
+
 MainWindow::~MainWindow()
 {
-    delete audioStream;
     delete keyboardWidget;
     delete staveWidget;
     delete menuWidget;
     delete centralWidget;
-    delete keyPressTimer;
-    delete noSoundTimer;
-    delete keysPressed;
-    keyPressThread->terminate();
-    delete keyPressThread;
+    delete viewModel;
 }
 
 
@@ -62,116 +77,63 @@ void MainWindow::buildUi()
 
 void MainWindow::keyPressEvent(QKeyEvent* event)
 {
-    if (!KeyboardData::isKeyUsed(event->key()))
-        return;
-
-    if (KeyboardData::isFunctionalKeyPressed(event->key()))
-        return;
-
-    if (event->isAutoRepeat())
-        return;
-
-    if (NoteData::recordingAudio)
-    {
-        int noSoundDuration = noSoundTimer->elapsed();
-        if (!NoteData::recordedAudioBuffer->empty())
-            NoteData::recordedAudioBuffer->push(std::pair<AudioSource*, int>(nullptr, noSoundDuration));
-    }
-
-    keysPressed->push(event->key());
-    keyPressThread->setCurrentSound(KeyboardData::getAudio(keysPressed->top()));
-
-    KeyWidget* keyWidget = keyboardWidget->getKeyWidget(event->key());
-    keyWidget->highlightPressedKey();
-
-    keyPressTimer->restart();
-    keyPressed = true;
+    if (!(event->isAutoRepeat()))
+        emit keyPressSignal(event->key());
 }
 
 
 
 void MainWindow::keyReleaseEvent(QKeyEvent* event)
 {
-    if (!KeyboardData::isKeyUsed(event->key()))
-    {
-        if (KeyboardData::changeSoundKeyValue)
-        {
-            menuWidget->changeSoundKeyPair(event->key());
-        }
-        return;
-    }
-
-    if (event->key() == Qt::Key_Up)
-    {
-        menuWidget->prevOption();
-        return;
-    }
-    else if (event->key() == Qt::Key_Down)
-    {
-        menuWidget->nextOption();
-        return;
-    }
-    else if (event->key() == Qt::Key_Left)
-    {
-        menuWidget->leftRelativeOption();
-        return;
-    }
-    else if (event->key() == Qt::Key_Right)
-    {
-        menuWidget->rightRelativeOption();
-        return;
-    }
-
-    else if (event->key() == Qt::Key_Return)
-    {
-        if (menuWidget->getCurrentLayout() == 2 and menuWidget->getCurrentOption() != 0)
-        {
-            if (menuWidget->getCurrentOption() <= NoteData::recordedTracks->size())
-                keyPressThread->displayRecordedAudio(menuWidget->getCurrentOption());
-        }
-        else
-            menuWidget->selectOption();
-        return;
-    }
-
-    if (event->isAutoRepeat())
-        return;
-
-    if (event->key() == Qt::Key_Space)
-    {
-        return;
-    }
-    else if (event->key() == Qt::Key_Escape)
-    {
-        staveWidget->clearStave();
-        return;
-    }
-
-    int duration = keyPressTimer->elapsed(), beats = (int)(duration * 4 / 1000);
-
-    if (NoteData::recordingAudio)
-        NoteData::recordedAudioBuffer->push(std::pair<AudioSource*, int>(NoteData::getSound(keysPressed->top()), duration));
-
-    if (keyPressed && keysPressed->empty())
-    {
-        keyPressed = false;
-    }
-    else
-    {
-        keyPressThread->setCurrentSound(KeyboardData::getAudio(keysPressed->top()));
-        keyPressed = false;
-    }
-
-
-    staveWidget->newNote(KeyboardData::getAudio(keysPressed->top()), beats);
-
-    if (!keysPressed->empty())
-    {
-        keysPressed->pop();
-    }
-
-    KeyWidget* keyWidget = keyboardWidget->getKeyWidget(event->key());
-    keyWidget->unhighlightPressedKey();
-
-    noSoundTimer->restart();
+    if (!(event->isAutoRepeat()))
+        emit keyReleaseSignal(event->key());
 };
+
+
+void MainWindow::visualiseKeyPress(int keyID) {
+    emit keyboardWidget->keyPressedSignal(keyID);
+}
+
+
+void MainWindow::visualiseKeyRelease(int keyID) {
+    emit keyboardWidget->keyReleasedSignal(keyID);
+}
+
+void MainWindow::emitClearStave() {
+    emit staveWidget->clearStaveSignal();
+}
+
+
+void MainWindow::emitChangeSoundKeyPair(int keyID) {
+    emit menuWidget->changeSoundKeyPairSignal(keyID);
+}
+
+
+void MainWindow::emitPrevOption() {
+    emit menuWidget->prevOptionSignal();
+}
+
+
+void MainWindow::emitNextOption() {
+    emit menuWidget->nextOptionSignal();
+}
+
+
+void MainWindow::emitLeftRelativeOption() {
+    emit menuWidget->leftRelativeOptionSignal();
+}
+
+
+void MainWindow::emitRightRelativeOption() {
+    emit menuWidget->rightRelativeOptionSignal();
+}
+
+
+void MainWindow::emitSelectOption() {
+    emit menuWidget->selectOptionSignal();
+}
+
+
+void MainWindow::emitCreateNewNote(int keyPressed, int beats) {
+    emit staveWidget->createNewNoteSignal(KeyboardData::getAudio(keyPressed), beats);
+}

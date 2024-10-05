@@ -12,8 +12,6 @@
 
 
 
-
-
 /// <summary>
 /// Klasa reprezentująca klawiaturę na ekranie.
 /// </summary>
@@ -33,24 +31,15 @@ public:
 	/// </summary>
 	~KeyboardWidget();
 
-	/// <summary>
-	/// Metoda zwracająca wskaźnik na obiekt KeyWidget zależnie do określonego symbolu słownego.
-	/// </summary>
-	KeyWidget * getKeyWidget(std::string keySymbol);
-
-	/// <summary>
-	/// Metoda zwracająca wskaźnik na obiekt KeyWidget zależnie do określonego ID klawisza.
-	/// </summary>
-	KeyWidget* getKeyWidget(int keyID);
 
 
-	/// <summary>
-	/// Metoda zwracająca wektor przechowujący wskaźniki do obiektów KeyWidget przynależnych do klawiatury.
-	/// </summary>
-	std::vector<KeyWidget*> getKeyWidgetsVector() { return *keyWidgetsVector; };
+	KeyboardViewModel* getViewModel() { return viewModel; }
 		
 
 private:
+
+	KeyboardViewModel* viewModel;
+
 	/// <summary>
 	/// Wskaźnik na pixmapę obiektu.
 	/// </summary>
@@ -70,22 +59,14 @@ private:
 	/// </summary>
 	void buildKeyboard();
 
-	/// <summary>
-	/// Wskaźnik na wektor wskaźników na klawisze klawiatury.
-	/// </summary>
-	std::vector<KeyWidget*>* keyWidgetsVector;
 
-	/// <summary>
-	/// Wskaźnik na timer renderujący klawiaturę.
-	/// </summary>
-	QTimer* updateTimer;
 
+
+signals:
+	void keyPressedSignal(int qKey);
+	void keyReleasedSignal(int qKey);
+	void newKeyWidgetCreated(KeyWidget* keyWidget);
 
 private slots:
 
-	/// <summary>
-	/// Metoda wywoływana gdy upłynie czas timera klawiatury. Odpowiada za przywrócenie domyślnego wyglądu 
-	/// klawiszom.
-	/// </summary>
-	void onTimeout();
 };
