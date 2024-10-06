@@ -28,6 +28,8 @@ public:
 	/// </summary>
 	~MenuWidget();
 
+	MenuViewModel* getViewModel() { return viewModel; };
+
 
 private:
 

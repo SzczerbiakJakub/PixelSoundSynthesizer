@@ -61,6 +61,9 @@ signals:
     void emitRightRelativeOptionSignal();
     void emitSelectOptionSignal();
     void emitCreateNewNoteSignal(int keyPressed, int beats);
+    void startPlayingRecordSignal();
+    void stopPlayingRecordSignal();
+
 
 public slots:
 	void displayRecordedAudio(int option);

@@ -72,6 +72,12 @@ signals:
 	void rebuildUISignal(int layoutOption);
 	void displaySelectedAudioSignal(int option);
 
+	void startRecordingSignal();
+	void stopRecordingSignal();
+
+	void startPlayingSignal();
+	void stopPlayingSignal();
+
 
 public slots:
 	/// <summary>

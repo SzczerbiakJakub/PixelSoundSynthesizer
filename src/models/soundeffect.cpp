@@ -167,8 +167,8 @@ Exit:
 
 AudioStream::~AudioStream() {
 
-    CoTaskMemFree(pwfx);
     hr = pAudioClient->Stop();
+    CoTaskMemFree(pwfx);
     SAFE_RELEASE(pAudioClient);
     SAFE_RELEASE(pRenderClient);
     CoUninitialize();

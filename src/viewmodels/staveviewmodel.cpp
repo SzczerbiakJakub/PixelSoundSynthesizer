@@ -4,6 +4,14 @@
 StaveViewModel::StaveViewModel(QObject* parent) : QObject(parent) {
 
 	notes = new std::queue<NoteWidget*>;
+
+	renderTimer = new QTimer();
+	renderThread = new StaveWidgetRenderThread(&recording, &playing);
+
+	recording = false;
+	playing = false;
+	painted = false;
+
 }
 
 StaveViewModel::~StaveViewModel() {
@@ -15,6 +23,7 @@ StaveViewModel::~StaveViewModel() {
 		delete widget;
 	}
 	delete notes;
+	delete renderTimer;
 }
 
 
@@ -45,7 +54,7 @@ void StaveViewModel::pushNotes() {
 		tempQueue.pop();
 		noteWidget->setX(noteWidget->getX() - 60);
 		noteWidget->move(noteWidget->getX(), noteWidget->getY());
-		if (noteWidget->getX() > 70)
+		if (noteWidget->getX() > 120)
 			notes->push(noteWidget);
 		else
 			delete noteWidget;
@@ -94,4 +103,47 @@ void StaveViewModel::createNewNote(AudioSource* audioSource, int beats) {
 
 void StaveViewModel::pushNewNoteToQueue(NoteWidget* note) {
 	notes->push(note);
+}
+
+
+void StaveViewModel::checkRecordState(QPainter* painter) {
+	if (painted)
+		painted = false;
+	else
+		painted = true;
+	emit updateRecordStateSignal(painter, &recording, &playing, &painted);
+}
+
+
+void StaveViewModel::setRecording() {
+	recording = true;
+	playing = false;
+	emit clearStave();
+	renderTimer->start(RECORD_STATE_RENDER_TIME);
+	qDebug() << "SETTING RECORDING";
+}
+
+
+void StaveViewModel::unsetRecording() {
+	emit clearStave();
+	recording = false;
+	playing = false;
+	qDebug() << "RESETING RECORDING";
+}
+
+
+void StaveViewModel::setPlaying() {
+	playing = true;
+	recording = false;
+	emit clearStave();
+	renderTimer->start(RECORD_STATE_RENDER_TIME);
+	qDebug() << "SETTING PLAYING";
+}
+
+
+void StaveViewModel::unsetPlaying() {
+	emit clearStave();
+	playing = false;
+	recording = false;
+	qDebug() << "RESETING PLAYING";
 }

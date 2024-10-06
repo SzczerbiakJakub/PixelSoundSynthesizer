@@ -15,6 +15,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     
     QObject::connect(menuWidget, &MenuWidget::displaySelectedAudioSignal, viewModel, &MainWindowViewModel::displayRecordedAudio);
+    QObject::connect(menuWidget->getViewModel(), &MenuViewModel::startRecordingSignal, staveWidget, &StaveWidget::setRecordingSignal);
+    QObject::connect(menuWidget->getViewModel(), &MenuViewModel::stopRecordingSignal, staveWidget, &StaveWidget::unsetRecordingSignal);
+
+    QObject::connect(viewModel, &MainWindowViewModel::startPlayingRecordSignal, staveWidget, &StaveWidget::setPlayingSignal);
+    QObject::connect(viewModel, &MainWindowViewModel::stopPlayingRecordSignal, staveWidget, &StaveWidget::unsetPlayingSignal);
     
     QObject::connect(viewModel, &MainWindowViewModel::visualiseKeyPressSignal , this, &MainWindow::visualiseKeyPress);
     QObject::connect(viewModel, &MainWindowViewModel::visualiseKeyReleaseSignal, this, &MainWindow::visualiseKeyRelease);

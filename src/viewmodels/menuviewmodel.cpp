@@ -115,6 +115,11 @@ void MenuViewModel::rebuildUi() {
 	}
 
 	emit rebuildUISignal(*layoutIterator);
+
+	/*if (*layoutIterator == 2 and *optionIterator != 0)
+		emit startPlayingSignal();
+	else
+		emit stopPlayingSignal();*/
 }
 
 
@@ -147,6 +152,7 @@ void MenuViewModel::selectOption() {
 		if (getCurrentOption() == 0)
 		{
 			NoteData::toggleRecordingAudio();
+			emit startRecordingSignal();
 		}
 		rebuildUi();
 		break;
@@ -157,15 +163,21 @@ void MenuViewModel::selectOption() {
 			if (!NoteData::isRecordingAudio() and !NoteData::recordedAudioBuffer->empty())
 				NoteData::saveRecordedAudio();
 			rebuildUi();
+			emit stopRecordingSignal();
 		}
 		break;
 	case 2:
 		if (getCurrentOption() == 0)
+		{
 			rebuildUi();
+		}
 		else
 		{
 			if (getCurrentOption() <= NoteData::recordedTracks->size())
+			{
 				emit displaySelectedAudioSignal(getCurrentOption());
+			}
+			
 		}
 		break;
 	case 3:

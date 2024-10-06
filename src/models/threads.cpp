@@ -7,6 +7,7 @@ KeyPressThread::KeyPressThread(bool* keyPressed, std::vector<int>* keysPressedSt
     audioStream = new AudioStream();
     displayAudio = false;
     keyPressTimer = new QElapsedTimer();
+    //bufferCopy = new std::queue<std::pair<AudioSource*, int>>;
 
 }
 
@@ -19,10 +20,11 @@ void KeyPressThread::displayRecordedAudio(int index) {
     std::vector<std::queue<std::pair<AudioSource*, int>>*> records = *NoteData::recordedTracks;
     if (!records.empty())
     {
-        std::queue<std::pair<AudioSource*, int>> bufferCopy = *records[index-1];
+        //std::queue<std::pair<AudioSource*, int>> bufferCopy = *records[index-1];
+        bufferCopy = *records[index - 1];
 
         displayAudio = true;
-        while (!bufferCopy.empty()) {
+        /*while (!bufferCopy.empty()) {
             if (bufferCopy.front().first != nullptr)
             {
                 setCurrentSound(bufferCopy.front().first);
@@ -35,7 +37,7 @@ void KeyPressThread::displayRecordedAudio(int index) {
             bufferCopy.pop();
         }
 
-        displayAudio = false;
+        displayAudio = false;*/
     }
 }
 
@@ -44,7 +46,9 @@ void KeyPressThread::displayAudioForCertainTime(int ms) {
     timer->start();
 
     while (timer->elapsed() < ms)
-        continue;
+        //continue;
+        if (currentSound != nullptr)
+            audioStream->playAudio(currentSound);
 
     delete timer;
 }
@@ -54,13 +58,50 @@ void KeyPressThread::run()
 {
     while (true)
     {
-        if ((!(keysPressedStack->empty()) or displayAudio) and currentSound != nullptr)
+        if ((!(keysPressedStack->empty())) and currentSound != nullptr)
         {
             while (!(keysPressedStack->empty()) or displayAudio)
             {
                 audioStream->playAudio(currentSound);
             }
         }
+        else if (displayAudio) {
+            
+            emit startPlayingRecordSignal();
+            
+            while (!bufferCopy.empty()) {
+                if (bufferCopy.front().first != nullptr)
+                    setCurrentSound(bufferCopy.front().first);
+                else
+                    setCurrentSound(nullptr);
+
+                displayAudioForCertainTime(bufferCopy.front().second);
+                bufferCopy.pop();
+            }
+            displayAudio = false;
+
+            emit stopPlayingRecordSignal();
+        }
         QThread::sleep(0.02);
+    }
+}
+
+
+StaveWidgetRenderThread::StaveWidgetRenderThread(bool* recording, bool* playing)
+    : recording(recording), playing(playing) {
+    renderTimer = new QTimer();
+}
+
+
+StaveWidgetRenderThread::~StaveWidgetRenderThread() {
+    delete renderTimer;
+}
+
+
+void StaveWidgetRenderThread::run() {
+
+    while (*recording or *playing)
+    {
+        renderTimer->start(RECORD_STATE_RENDER_TIME);
     }
 }

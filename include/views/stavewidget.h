@@ -3,13 +3,16 @@
 #include <QPainter>
 #include <QPen>
 #include <QLineF>
+#include <QPolygon>
 #include <QTimer>
 #include <QThread>
 #include <vector>
 #include <queue>
 #include "data.h"
+#include "fontdata.h"
 #include "notewidget.h"
 #include "threads.h"
+#include "menulabelwidget.h"
 #include "staveviewmodel.h"
 
 
@@ -40,6 +43,8 @@ private:
 
 	BassClefWidget* bassClef;
 
+	MenuLabelWidget* label;
+
 
 	/// <summary>
 	/// Metoda umożliwiająca zmianę wyglądu obiektu.
@@ -59,7 +64,7 @@ private:
 	/// <summary>
 	/// Metoda rysująca pięciolinie.
 	/// </summary>
-	void buildStaveLines(QPainter* painter);
+	void buildStave(QPainter* painter);
 
 
 signals:
@@ -67,7 +72,16 @@ signals:
 	void pushNewNoteSignal(NoteWidget* note);
 	void clearStaveSignal();
 
+	void checkRecordStateSignal(QPainter* painter);
+
+	void setRecordingSignal();
+	void unsetRecordingSignal();
+	void setPlayingSignal();
+	void unsetPlayingSignal();
+
 
 private slots:
 	void addNewNote(int notePosY, int beat);
+	void renderStave();
+	void updateRecordState(QPainter* painter, bool* recording, bool* playing, bool* painted);
 };

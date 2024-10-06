@@ -1,12 +1,14 @@
 ﻿#pragma once
 #include <QThread>
 #include <QElapsedTimer>
+#include <QTimer>
 #include <stack>
 #include <soundeffect.h>
 #include <data.h>
 
 
 
+#define RECORD_STATE_RENDER_TIME 400	//	in ms
 
 /// <summary>
 /// Klasa reprezentująca wątek przetwarzania dźwięku w programie.
@@ -56,10 +58,13 @@ private:
 
     QElapsedTimer* keyPressTimer;
 
+    std::queue<std::pair<AudioSource*, int>> bufferCopy;
+
     /// <summary>
     /// Włącza wątek.
     /// </summary>
     void run() override;
+
 
     /// <summary>
     /// Odtwarza obecny dźwięk przez określony czas.
@@ -97,5 +102,27 @@ private:
 
 signals:
     void emitCreateNewNoteSignal(int keyPressed, int beats);
+    void startPlayingRecordSignal();
+    void stopPlayingRecordSignal();
 
+};
+
+
+class StaveWidgetRenderThread : public QThread
+{
+    Q_OBJECT
+
+public:
+    StaveWidgetRenderThread(bool* recording, bool* playing);
+    ~StaveWidgetRenderThread();
+
+private:
+    QTimer* renderTimer;
+
+    bool* recording;
+    bool* playing;
+
+    void run() override;
+signals:
+    void delegateStaveRenderSignal();
 };

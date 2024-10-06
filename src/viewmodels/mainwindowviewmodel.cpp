@@ -14,6 +14,11 @@ MainWindowViewModel::MainWindowViewModel(QObject* parent) : QObject(parent) {
 
     QObject::connect(keyPressThread, &KeyPressThread::emitCreateNewNoteSignal,
         this, &MainWindowViewModel::emitCreateNewNoteSignal);
+
+    QObject::connect(keyPressThread, &KeyPressThread::startPlayingRecordSignal,
+        this, &MainWindowViewModel::startPlayingRecordSignal);
+    QObject::connect(keyPressThread, &KeyPressThread::stopPlayingRecordSignal,
+        this, &MainWindowViewModel::stopPlayingRecordSignal);
 }
 
 
@@ -39,7 +44,7 @@ void MainWindowViewModel::keyPress(int keyID) {
     if (NoteData::recordingAudio)
     {
         int noSoundDuration = noSoundTimer->elapsed();
-        if (!NoteData::recordedAudioBuffer->empty())
+        if (!NoteData::recordedAudioBuffer->empty() and keysPressed->empty())
             NoteData::recordedAudioBuffer->push(std::pair<AudioSource*, int>(nullptr, noSoundDuration));
     }
 
