@@ -199,7 +199,7 @@ std::vector<std::string>* NoteData::getSoundToKeyStrings() {
 
 
 std::vector<int> KeyboardData::functionalKeysUsed = {
-	Qt::Key_Escape, Qt::Key_Return, Qt::Key_Space, Qt::Key_Up, Qt::Key_Down, Qt::Key_Left, Qt::Key_Right, Qt::Key_Backspace
+	Qt::Key_Escape, Qt::Key_Return, Qt::Key_Up, Qt::Key_Down, Qt::Key_Left, Qt::Key_Right, Qt::Key_Backspace
 };
 
 
@@ -259,13 +259,23 @@ AudioSource* KeyboardData::getAudio(int keyID) {
 	return getPairByKeyID(keyID).first;
 }
 
+
 bool KeyboardData::changeSoundKeyValue = false;
+
 
 void KeyboardData::changeKeyOfSelectedSound(int selectedSoundOption, int keyID) {
 
+	int formerKeyID = KeyboardData::soundToKeyDictionary[selectedSoundOption].second;
+
+	NoteData::keyToNoteDictionary.erase(formerKeyID);
+
+	AudioSource* sound = KeyboardData::soundToKeyDictionary[selectedSoundOption].first;
 	KeyboardData::soundToKeyDictionary[selectedSoundOption].second = keyID;
-	changeSoundKeyValue = false;
+
+	NoteData::keyToNoteDictionary[keyID] = sound;
+	changeSoundKeyValue = false; 
 }
+
 
 bool KeyboardData::isKeyUsed(int keyID) {
 	bool isUsed = false;

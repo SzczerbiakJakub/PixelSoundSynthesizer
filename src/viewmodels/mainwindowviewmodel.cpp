@@ -5,6 +5,7 @@
 
 MainWindowViewModel::MainWindowViewModel(QObject* parent) : QObject(parent) {
     keyPressed = false;
+    changingSoundKeyPair = false;
     keysPressed = new std::vector<int>;
     keyPressThread = new KeyPressThread(&keyPressed, keysPressed);
     noSoundTimer = new QElapsedTimer();
@@ -12,13 +13,16 @@ MainWindowViewModel::MainWindowViewModel(QObject* parent) : QObject(parent) {
 	keyPressThread->start();
 	noSoundTimer->start();
 
+    QObject::connect(this, &MainWindowViewModel::restartKeyPressTimerSignal,
+        keyPressThread, &KeyPressThread::restartKeyPressTimer);
+
     QObject::connect(keyPressThread, &KeyPressThread::emitCreateNewNoteSignal,
         this, &MainWindowViewModel::emitCreateNewNoteSignal);
-
     QObject::connect(keyPressThread, &KeyPressThread::startPlayingRecordSignal,
         this, &MainWindowViewModel::startPlayingRecordSignal);
     QObject::connect(keyPressThread, &KeyPressThread::stopPlayingRecordSignal,
         this, &MainWindowViewModel::stopPlayingRecordSignal);
+
 }
 
 
@@ -40,6 +44,8 @@ void MainWindowViewModel::keyPress(int keyID) {
     if (KeyboardData::isFunctionalKeyPressed(keyID))
         return;
 
+    if (changingSoundKeyPair)
+        return;
 
     if (NoteData::recordingAudio)
     {
@@ -51,11 +57,14 @@ void MainWindowViewModel::keyPress(int keyID) {
     if (!keysPressed->empty())
     {
         int duration = keyPressTimer->elapsed(), beats = (int)(duration * 4 / 1000);
+        if (beats >= 8)
+            beats = beats % 8;
 
         if (NoteData::recordingAudio)
             NoteData::recordedAudioBuffer->push(std::pair<AudioSource*, int>(NoteData::getSound(keysPressed->back()), duration));
 
-        emit emitCreateNewNoteSignal(keysPressed->back(), beats);
+        emit emitCreateNewNoteSignal(NoteData::getSound(keysPressed->back()), beats);
+        emit restartKeyPressTimerSignal();
         keyPressTimer->restart();
     }
 
@@ -71,11 +80,7 @@ void MainWindowViewModel::keyPress(int keyID) {
 
 void MainWindowViewModel::keyRelease(int keyID) {
 
-    if (keyID == Qt::Key_Space)
-    {
-        return;
-    }
-    else if (keyID == Qt::Key_Escape)
+    if (keyID == Qt::Key_Escape)
     {
         emit emitClearStaveSignal();
         return;
@@ -83,9 +88,10 @@ void MainWindowViewModel::keyRelease(int keyID) {
 
     if (!KeyboardData::isKeyUsed(keyID))
     {
-        if (KeyboardData::changeSoundKeyValue)
+        if (changingSoundKeyPair)
         {
-            emit emitChangeSoundKeyPairSignal(keyID);
+            emit changeSoundKeyPairSignal(keyID);
+            changingSoundKeyPair = false;
         }
         return;
     }
@@ -119,6 +125,8 @@ void MainWindowViewModel::keyRelease(int keyID) {
 
 
     int duration = keyPressTimer->elapsed(), beats = (int)(duration * 4 / 1000);
+    if (beats >= 8)
+        beats = beats % 8;
 
     if (NoteData::recordingAudio)
         NoteData::recordedAudioBuffer->push(std::pair<AudioSource*, int>(NoteData::getSound(keysPressed->back()), duration));
@@ -128,7 +136,8 @@ void MainWindowViewModel::keyRelease(int keyID) {
         keyPressed = false;
     }
 
-    emit emitCreateNewNoteSignal(keysPressed->back(), beats);
+    emit emitCreateNewNoteSignal(NoteData::getSound(keysPressed->back()), beats);
+
 
     if (!keysPressed->empty())
     {
@@ -149,4 +158,8 @@ void MainWindowViewModel::keyRelease(int keyID) {
 
 void MainWindowViewModel::displayRecordedAudio(int option) {
     keyPressThread->displayRecordedAudio(option);
+}
+
+void MainWindowViewModel::setChangingSoundKeyValue() {
+    changingSoundKeyPair = true;
 }

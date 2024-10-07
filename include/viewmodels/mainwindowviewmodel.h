@@ -43,6 +43,8 @@ private:
     /// </summary>
     bool keyPressed;
 
+    bool changingSoundKeyPair;
+
     /// <summary>
     /// Wskaźnik na stos zawierający ID wciśniętych przycisków.
     /// </summary>
@@ -60,9 +62,11 @@ signals:
     void emitLeftRelativeOptionSignal();
     void emitRightRelativeOptionSignal();
     void emitSelectOptionSignal();
-    void emitCreateNewNoteSignal(int keyPressed, int beats);
+    void emitCreateNewNoteSignal(AudioSource* audioSource, int beats);
     void startPlayingRecordSignal();
     void stopPlayingRecordSignal();
+    void restartKeyPressTimerSignal();
+    void changeSoundKeyPairSignal(int selectedKeyID);
 
 
 public slots:
@@ -70,6 +74,8 @@ public slots:
 
     void keyPress(int keyID);
     void keyRelease(int keyID);
+    
+    void setChangingSoundKeyValue();
 
 };
 

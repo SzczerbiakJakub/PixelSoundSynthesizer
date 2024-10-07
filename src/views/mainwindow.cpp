@@ -17,6 +17,11 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(menuWidget, &MenuWidget::displaySelectedAudioSignal, viewModel, &MainWindowViewModel::displayRecordedAudio);
     QObject::connect(menuWidget->getViewModel(), &MenuViewModel::startRecordingSignal, staveWidget, &StaveWidget::setRecordingSignal);
     QObject::connect(menuWidget->getViewModel(), &MenuViewModel::stopRecordingSignal, staveWidget, &StaveWidget::unsetRecordingSignal);
+    
+    QObject::connect(menuWidget->getViewModel(), &MenuViewModel::changingSoundKeyValueSignal,
+        viewModel, &MainWindowViewModel::setChangingSoundKeyValue);
+    QObject::connect(viewModel, &MainWindowViewModel::changeSoundKeyPairSignal,
+        menuWidget->getViewModel(), &MenuViewModel::changeSoundKeyPair);
 
     QObject::connect(viewModel, &MainWindowViewModel::startPlayingRecordSignal, staveWidget, &StaveWidget::setPlayingSignal);
     QObject::connect(viewModel, &MainWindowViewModel::stopPlayingRecordSignal, staveWidget, &StaveWidget::unsetPlayingSignal);
@@ -139,6 +144,6 @@ void MainWindow::emitSelectOption() {
 }
 
 
-void MainWindow::emitCreateNewNote(int keyPressed, int beats) {
-    emit staveWidget->createNewNoteSignal(KeyboardData::getAudio(keyPressed), beats);
+void MainWindow::emitCreateNewNote(AudioSource* audioSource, int beats) {
+    emit staveWidget->createNewNoteSignal(audioSource, beats);
 }

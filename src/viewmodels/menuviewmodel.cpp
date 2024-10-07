@@ -169,6 +169,7 @@ void MenuViewModel::selectOption() {
 	case 2:
 		if (getCurrentOption() == 0)
 		{
+			emit stopRecordingSignal();
 			rebuildUi();
 		}
 		else
@@ -182,7 +183,10 @@ void MenuViewModel::selectOption() {
 		break;
 	case 3:
 		if (getCurrentOption() != 0)
+		{
 			KeyboardData::changeSoundKeyValue = true;
+			emit changingSoundKeyValueSignal();
+		}
 		rebuildUi();
 		break;
 	}

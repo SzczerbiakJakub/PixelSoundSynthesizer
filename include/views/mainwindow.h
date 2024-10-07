@@ -95,6 +95,6 @@ private slots:
     void emitLeftRelativeOption();
     void emitRightRelativeOption();
     void emitSelectOption();
-    void emitCreateNewNote(int keyPressed, int beats);
+    void emitCreateNewNote(AudioSource* audioSource, int beats);
 
 };

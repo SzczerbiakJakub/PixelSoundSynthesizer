@@ -120,7 +120,6 @@ void StaveViewModel::setRecording() {
 	playing = false;
 	emit clearStave();
 	renderTimer->start(RECORD_STATE_RENDER_TIME);
-	qDebug() << "SETTING RECORDING";
 }
 
 
@@ -128,7 +127,6 @@ void StaveViewModel::unsetRecording() {
 	emit clearStave();
 	recording = false;
 	playing = false;
-	qDebug() << "RESETING RECORDING";
 }
 
 
@@ -137,13 +135,10 @@ void StaveViewModel::setPlaying() {
 	recording = false;
 	emit clearStave();
 	renderTimer->start(RECORD_STATE_RENDER_TIME);
-	qDebug() << "SETTING PLAYING";
 }
 
 
 void StaveViewModel::unsetPlaying() {
-	emit clearStave();
 	playing = false;
 	recording = false;
-	qDebug() << "RESETING PLAYING";
 }

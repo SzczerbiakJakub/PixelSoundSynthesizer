@@ -78,6 +78,8 @@ signals:
 	void startPlayingSignal();
 	void stopPlayingSignal();
 
+	void changingSoundKeyValueSignal();
+
 
 public slots:
 	/// <summary>

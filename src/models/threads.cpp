@@ -3,10 +3,11 @@
 
 KeyPressThread::KeyPressThread(bool* keyPressed, std::vector<int>* keysPressedStack) :
     keyPressed(keyPressed), keysPressedStack(keysPressedStack) {
-    currentSound = SoundEffects::soundB4;
+    currentSound = NULL;
     audioStream = new AudioStream();
     displayAudio = false;
     keyPressTimer = new QElapsedTimer();
+    keyPressTimer->start();
     //bufferCopy = new std::queue<std::pair<AudioSource*, int>>;
 
 }
@@ -41,16 +42,18 @@ void KeyPressThread::displayRecordedAudio(int index) {
     }
 }
 
-void KeyPressThread::displayAudioForCertainTime(int ms) {
-    QElapsedTimer* timer = new QElapsedTimer();
-    timer->start();
+void KeyPressThread::displayAudioForCertainTime(AudioSource* audioSource, int ms) {
+    QElapsedTimer timer;
+    int beats = (int)(ms * 4 / 1000);
+    if (audioSource != NULL)
+        emit emitCreateNewNoteSignal(audioSource, beats);
 
-    while (timer->elapsed() < ms)
+    timer.start();
+    while (timer.elapsed() < ms)
         //continue;
         if (currentSound != nullptr)
             audioStream->playAudio(currentSound);
 
-    delete timer;
 }
 
 
@@ -60,10 +63,19 @@ void KeyPressThread::run()
     {
         if ((!(keysPressedStack->empty())) and currentSound != nullptr)
         {
+            keyPressTimer->restart();
             while (!(keysPressedStack->empty()) or displayAudio)
             {
                 audioStream->playAudio(currentSound);
+
+                if (keyPressTimer->elapsed() > 2000)     //  2000 ms stands for 8 beats here
+                {
+                    keyPressTimer->restart();
+                    emit emitCreateNewNoteSignal(currentSound, 8);
+                }
+
             }
+            currentSound = NULL;
         }
         else if (displayAudio) {
             
@@ -75,15 +87,21 @@ void KeyPressThread::run()
                 else
                     setCurrentSound(nullptr);
 
-                displayAudioForCertainTime(bufferCopy.front().second);
+                displayAudioForCertainTime(bufferCopy.front().first, bufferCopy.front().second);
                 bufferCopy.pop();
             }
             displayAudio = false;
 
             emit stopPlayingRecordSignal();
+            currentSound = NULL;
         }
         QThread::sleep(0.02);
     }
+}
+
+
+void KeyPressThread::restartKeyPressTimer() {
+    keyPressTimer->restart();
 }
 
 

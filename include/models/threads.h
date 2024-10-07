@@ -70,7 +70,7 @@ private:
     /// Odtwarza obecny dźwięk przez określony czas.
     /// </summary>
     /// <param name=ms> Czas w milisekundach.</param>
-    void displayAudioForCertainTime(int ms);
+    void displayAudioForCertainTime(AudioSource* audioSource, int ms);
 
     /// <summary>
     /// Parametr przechowujący informację odnośnie odtwarzania dźwięku.
@@ -101,9 +101,12 @@ private:
 
 
 signals:
-    void emitCreateNewNoteSignal(int keyPressed, int beats);
+    void emitCreateNewNoteSignal(AudioSource* audioSource, int beats);
     void startPlayingRecordSignal();
     void stopPlayingRecordSignal();
+
+public slots:
+    void restartKeyPressTimer();
 
 };
 
