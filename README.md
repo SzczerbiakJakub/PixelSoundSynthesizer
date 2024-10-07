@@ -58,7 +58,7 @@ L - C6 sound<br>
 
 ### FUNCTIONAL KEYS:
 
-Up Key - move upwards in the menu
-Down Key - move downwards in the menu
-Left Key - move left in the menu
-Right Key - move right in the menu
+Up Key - move upwards in the menu<br>
+Down Key - move downwards in the menu<br>
+Left Key - move left in the menu<br>
+Right Key - move right in the menu<br>
